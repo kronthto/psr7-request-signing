@@ -1,4 +1,13 @@
 {
+    "name": "kronthto/psr7-request-signing",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tobias Kronthaler",
+            "email": "kronthto@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/kronthto/psr7-request-signing",
     "require": {
         "psr/http-message": "^1.0",
         "php": ">=7.1"
@@ -20,5 +29,9 @@
     },
     "scripts": {
         "test": "phpunit --verbose"
-    }
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "prefer-stable": true
 }
