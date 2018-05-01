@@ -49,14 +49,28 @@ class Verifier
             throw new AuthenticationException('Request signature App-ID not found');
         }
 
+        $givenSignature = $this->parseSignature($this->getGivenSignature($request));
+        if (\count($givenSignature) !== 2) {
+            throw new AuthenticationException('Request signature malformed');
+        }
+
         if (!hash_equals(
-            $this->generateExpectedSignature($request, $remoteApp),
-            $this->getGivenSignature($request)
+            $this->generateExpectedSignature($request, $remoteApp, $givenSignature[0]),
+            $givenSignature[1]
         )) {
             throw new AuthenticationException('Request signature invalid');
         }
 
         return $remoteApp;
+    }
+
+    protected function parseSignature(?string $signature): array
+    {
+        if (!$signature) {
+            throw new AuthenticationException('Request does not contain a signature');
+        }
+
+        return explode('=', $signature, 2);
     }
 
     protected function getGivenSignature(MessageInterface $request): ?string
@@ -86,9 +100,17 @@ class Verifier
         return $this->remoteAppResolver->findRemoteAppById($this->getGivenAppId($request));
     }
 
-    protected function generateExpectedSignature(MessageInterface $request, RemoteAppInterface $remoteApp): string
-    {
-        // TODO: Provide support for more signature algorithms
-        return 'sha1='.hash_hmac('sha1', (string) $request->getBody(), $remoteApp->getSecret());
+    protected function generateExpectedSignature(
+        MessageInterface $request,
+        RemoteAppInterface $remoteApp,
+        string $algo
+    ): string {
+        $hash = hash_hmac($algo, (string) $request->getBody(), $remoteApp->getSecret());
+
+        if (!$hash) {
+            throw new AuthenticationException('Could not calculate the expected hash using algo '.$algo);
+        }
+
+        return $hash;
     }
 }

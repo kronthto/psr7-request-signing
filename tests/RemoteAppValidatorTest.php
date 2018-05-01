@@ -70,5 +70,18 @@ class RemoteAppValidatorTest extends TestCase
         $this->assertSame($this->remoteAppOne, $result);
     }
 
-    // TODO: Add tests for overriding options & non-existent headers
+    public function testValidateRemoteAppRequestHappyCaseSha256()
+    {
+        $request = new Request('POST', '/foo', [
+            Verifier::DEFAULT_ID_HEADER => 1,
+            Verifier::DEFAULT_SIG_HEADER => 'sha256=f5fd538a138e8eecd52abb9a3297e195cb871f0ab1222c9f10b9f4f7e6e6c262',
+        ], '{"foo": 1}');
+
+        $result = $this->verifier->validateRemoteAppRequest($request);
+
+        $this->assertInstanceOf(RemoteAppInterface::class, $result);
+        $this->assertSame($this->remoteAppOne, $result);
+    }
+
+    // TODO: Add tests for overriding options & non-existent headers / error cases
 }
