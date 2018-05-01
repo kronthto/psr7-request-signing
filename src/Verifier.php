@@ -105,12 +105,10 @@ class Verifier
         RemoteAppInterface $remoteApp,
         string $algo
     ): string {
-        $hash = hash_hmac($algo, (string) $request->getBody(), $remoteApp->getSecret());
-
-        if (!$hash) {
-            throw new AuthenticationException('Could not calculate the expected hash using algo '.$algo);
+        try {
+            return Signer::getExpectedHashOfRequest($request, $remoteApp->getSecret(), $algo);
+        } catch (\InvalidArgumentException $e) {
+            throw new AuthenticationException('Failed to calculate the expected hash', 0, $e);
         }
-
-        return $hash;
     }
 }
